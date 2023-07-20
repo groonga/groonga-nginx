@@ -1,0 +1,123 @@
+# Copyright (C) 2012-2017 Brazil
+# Copyright (C) 2023  Sutou Kouhei <kou@clear-code.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License version 2.1 as published by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+name: Test
+on:
+  push:
+  pull_request:
+concurrency:
+  group: ${{ github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+jobs:
+  ubuntu:
+    name: Ubuntu + Groonga (${{ matrix.groonga-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        groonga-version:
+          - "latest"
+          - "master"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt -y install \
+            ccache
+          apt source nginx
+          ln -fs nginx-* nginx
+      - name: Cache ccache
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ubuntu-${{ matrix.groonga-version }}-ccache-${{ hashFiles('*.c') }}
+          restore-keys: ubuntu-${{ matrix.groonga-version }}-ccache-
+      - uses: actions/checkout@v3
+        if:
+          matrix.groonga-version == 'master'
+        with:
+          repository: groonga/groonga
+          path: groonga
+          submodules: recursive
+      - name: Install Groonga
+        run: |
+          if [ ${{ matrix.groonga-version }} = "latest" ]; then
+            sudo apt -y install software-properties-common
+            sudo add-apt-repository -y universe
+            sudo add-apt-repository -y ppa:groonga/ppa
+            sudo apt update
+            sudo apt -y install libgroonga-dev
+          else
+            sudo apt -y install ninja-build
+            cmake \
+              -S groonga \
+              -B groonga.build \
+              -G Ninja \
+              -DCMAKE_INSTALL_PREFIX=/tmp/local \
+              -DCMAKE_BUILD_TYPE=Debug
+            ninja -C groonga.build install
+            echo "PKG_CONFIG_PATH=/tmp/local/lib/pkgconfig" >> $GITHUB_ENV
+          fi
+      - name: Build
+        run: |
+          cd nginx
+          ./configure \
+            --add-dynamic-module=.. \
+            --prefix=/tmp/local
+          make -j$(nproc)
+          make install
+      - name: Enable Apache Arrow repository
+        if:
+          matrix.groonga-version == 'master'
+        run: |
+          sudo apt update -o="APT::Acquire::Retries=3"
+          sudo apt install -y -V -o="APT::Acquire::Retries=3" \
+            lsb-release \
+            wget
+          wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+          sudo apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+          sudo apt update -o="APT::Acquire::Retries=3"
+      - name: Install test dependencies
+        if:
+          matrix.groonga-version == 'master'
+        run: |
+          sudo env MAKEFLAGS=-j$(nproc) gem install \
+            grntest \
+            pkg-config \
+            red-arrow
+      - name: Set environment variables
+        run: |
+          echo "LD_LIBRARY_PATH=/tmp/local/lib" >> ${GITHUB_ENV}
+          echo "TZ=Asia/Tokyo" >> ${GITHUB_ENV}
+
+          echo "/tmp/local/bin" >> ${GITHUB_PATH}
+          echo "/tmp/local/sbin" >> ${GITHUB_PATH}
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/red-datasets
+          key: red-datasets-ubuntu
+      - name: "Test: HTTP: groonga-httpd"
+        run: |
+          cd groonga
+          grntest \
+            --base-dir test/command \
+            --groonga-httpd=nginx \
+            --n-retries=3 \
+            --read-timeout=30 \
+            --reporter=mark \
+            --testee groonga-httpd \
+            test/command/suite
