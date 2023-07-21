@@ -37,3 +37,23 @@ end
 
 desc "Create archive"
 task :dist => archive_name
+
+desc "Tag #{version}"
+task :tag do
+  changelog = "packages/debian/changelog"
+  next unless File.exist?(changelog)
+  case File.readlines(changelog)[0]
+  when /\((.+)-1\)/
+    package_version = $1
+    unless package_version == GroongaNginx::VERSION
+      raise "package version isn't updated: #{package_version}"
+    end
+  else
+    raise "failed to detect deb package version: #{changelog}"
+  end
+
+  sh("git", "tag",
+     "-a", GroongaNginx::VERSION,
+     "-m", "#{package} #{GroongaNginx::VERSION} has been released!!!")
+  sh("git", "push", "--tags")
+end
