@@ -70,10 +70,10 @@ jobs:
         include:
           - id: debian-bookworm-amd64
             task-namespace: apt
-            target: debian-bookworm
           - id: debian-bookworm-arm64
             task-namespace: apt
-            target: debian-bookworm
+          - id: ubuntu-lunar-amd64
+            task-namespace: apt
     runs-on: ubuntu-latest
     env:
       GROONGA_REPOSITORY: ${{ github.workspace }}/groonga
@@ -109,25 +109,24 @@ jobs:
       - name: Cache ccache
         uses: actions/cache@v3
         with:
-          path: packages/${{ matrix.task-namespace }}/build/${{ matrix.target }}/ccache
+          path: packages/${{ matrix.task-namespace }}/build/${{ matrix.id }}/ccache
           key: package-${{ matrix.id }}-ccache-${{ hashFiles('*.c') }}
           restore-keys: package-${{ matrix.id }}-ccache-
+      - name: Prepare target
+        run: |
+          target=$(echo ${{ matrix.id }} | sed -e 's/-amd64$//g')
+          echo "APT_TARGETS=${target}" >> $GITHUB_ENV
+          echo "YUM_TARGETS=${target}" >> $GITHUB_ENV
       - name: Build with docker
         run: |
           cd packages
           rake docker:pull || :
           rake ${{ matrix.task-namespace }}:build BUILD_DIR=build
-        env:
-          APT_TARGETS: ${{ matrix.target }}
-          YUM_TARGETS: ${{ matrix.target }}
       - name: Push the built Docker image
         continue-on-error: true
         run: |
           cd packages
           rake docker:push
-        env:
-          APT_TARGETS: ${{ matrix.target }}
-          YUM_TARGETS: ${{ matrix.target }}
 
       # Artifact
       - uses: actions/upload-artifact@v3
