@@ -40,6 +40,12 @@ task :dist => archive_name
 
 desc "Tag #{GroongaNginx::VERSION}"
 task :tag do
+  latest_release_note = File.read("NEWS.md").split(/^## /)[1]
+  version = latest_release_note.lines.first.split(" - ", 2)[0]
+  if version != GroongaNginx::VERSION
+    raise "release note isn't written"
+  end
+
   changelog = "packages/debian/changelog"
   case File.readlines(changelog)[0]
   when /\((.+)-1\)/
