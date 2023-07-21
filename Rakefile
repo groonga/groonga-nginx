@@ -56,3 +56,42 @@ task :tag do
      "-m", "#{package} #{GroongaNginx::VERSION} has been released!!!")
   sh("git", "push", "--tags")
 end
+
+namespace :package do
+  desc "Release sources"
+  task :source do
+    cd("packages") do
+      ruby("-S", "rake", "source")
+    end
+  end
+
+  desc "Release APT packages"
+  task :apt do
+    cd("packages") do
+      ruby("-S", "rake", "apt")
+    end
+  end
+
+  desc "Release Ubuntu packages"
+  task :ubuntu do
+    cd("packages") do
+      ruby("-S", "rake", "ubuntu")
+    end
+  end
+
+  desc "Release Yum packages"
+  task :yum do
+    cd("packages") do
+      ruby("-S", "rake", "yum")
+    end
+  end
+
+  namespace :version do
+    desc "Update versions"
+    task :update do
+      cd("packages") do
+        ruby("-S", "rake", "version:update")
+      end
+    end
+  end
+end
