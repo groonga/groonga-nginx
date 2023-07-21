@@ -123,10 +123,10 @@ jobs:
         run: |
           cd groonga
           grntest \
-            --base-dir test/command \
-            --groonga-httpd=nginx \
+            --base-dir=test/command \
             --n-retries=3 \
+            --ngx-http-groonga-module-so=/tmp/local/modules/ngx_http_groonga_module.so \
             --read-timeout=30 \
             --reporter=mark \
-            --testee groonga-httpd \
+            --testee=groonga-httpd \
             test/command/suite
