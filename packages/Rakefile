@@ -157,6 +157,10 @@ class GroongaNginxPackageTask < PackagesGroongaOrgPackageTask
     end
     github_download_url(base_name)
   end
+
+  def built_package_n_split_components
+    3
+  end
 end
 
 task = GroongaNginxPackageTask.new
