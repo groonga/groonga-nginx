@@ -118,6 +118,45 @@ class GroongaNginxPackageTask < PackagesGroongaOrgPackageTask
   def enable_yum?
     false
   end
+
+  def source_targets_default
+    [
+      @archive_name,
+    ]
+  end
+
+  def use_built_package?
+    true
+  end
+
+  def use_packages_groonga_org?(target_namespace)
+    case target_namespace
+    when :source
+      false
+    else
+      true
+    end
+  end
+
+  def built_package_url(target_namespace, target)
+    case target_namespace
+    when :apt
+      if target.end_with?("-arm64")
+        base_name = "#{target}.tar.gz"
+      else
+        base_name = "#{target}-amd64.tar.gz"
+      end
+    when :yum
+      if target.end_with?("-aarch64")
+        base_name = "#{target}.tar.gz"
+      else
+        base_name = "#{target}-x86_64.tar.gz"
+      end
+    else
+      base_name = target
+    end
+    github_download_url(base_name)
+  end
 end
 
 task = GroongaNginxPackageTask.new
