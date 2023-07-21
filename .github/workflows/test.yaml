@@ -64,7 +64,11 @@ jobs:
             sudo apt update
             sudo apt -y -V install libgroonga-dev
           else
-            sudo apt -y install ninja-build
+            sudo apt -y install \
+              cmake \
+              libmecab-dev \
+              mecab-naist-jdic \
+              ninja-build
             cmake \
               -S groonga \
               -B groonga.build \
@@ -117,7 +121,7 @@ jobs:
           path: |
             ~/.cache/red-datasets
           key: red-datasets-ubuntu
-      - name: "Test: HTTP: groonga-httpd"
+      - name: Test
         if:
           matrix.groonga-version == 'master'
         run: |
