@@ -17,6 +17,8 @@
 
 set -eux
 
+echo "::group::Prepare external repositories"
+
 echo "debconf debconf/frontend select Noninteractive" | \
   sudo debconf-set-selections
 
@@ -45,6 +47,11 @@ wget \
   https://packages.groonga.org/${distribution}/groonga-apt-source-latest-${code_name}.deb
 sudo apt install -V -y ./groonga-apt-source-latest-${code_name}.deb
 sudo apt update
+
+echo "::endgroup::"
+
+
+echo "::group::Prepare local repository"
 
 (echo "Key-Type: RSA"; \
  echo "Key-Length: 4096"; \
@@ -76,12 +83,59 @@ deb [signed-by=/usr/share/keyrings/groonga-nginx.gpg] file://${PWD} ${code_name}
 APT_SOURCES
 popd
 
+echo "::endgroup::"
+
+
+echo "::group::Install"
 sudo apt update
 sudo apt install -V -y libnginx-mod-http-groonga
+echo "::endgroup::"
 
+
+echo "::group::Enable"
 sudo ln -s ../groonga.conf /etc/nginx/conf.d/
 sudo systemctl restart nginx
+echo "::endgroup::"
 
-curl http://localhost:10041/d/status
 
-# TODO: Run grntest based tests
+echo "::group::Connection test"
+sudo apt install -V -y jq
+curl http://localhost:10041/d/status | tee status.json
+groonga_version=$(jq -r '.[1].version' status.json)
+echo "::endgroup::"
+
+
+echo "::group::Prepare test"
+sudo apt install -V -y \
+  gcc \
+  git \
+  groonga-bin \
+  groonga-tokenizer-mecab \
+  libarrow-glib-dev \
+  make \
+  ruby-dev
+sudo env MAKEFLAGS=-j$(nproc) gem install \
+  grntest \
+  pkg-config \
+  red-arrow
+export TZ=Asia/Tokyo
+PATH=/usr/sbin:$PATH
+git clone \
+  --branch v${groonga_version} \
+  https://github.com/groonga/groonga.git
+echo "::endgroup::"
+
+
+echo "::group::Test"
+cd groonga
+grntest \
+  --base-dir=test/command \
+  --n-retries=2 \
+  --ngx-http-groonga-module-so=/usr/lib/nginx/modules/ngx_http_groonga_module.so \
+  --read-timeout=30 \
+  --reporter=mark \
+  --testee=groonga-nginx \
+  test/command/suite
+echo "::endgroup::"
+
+
