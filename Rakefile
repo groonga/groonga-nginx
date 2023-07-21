@@ -38,10 +38,9 @@ end
 desc "Create archive"
 task :dist => archive_name
 
-desc "Tag #{version}"
+desc "Tag #{GroongaNginx::VERSION}"
 task :tag do
   changelog = "packages/debian/changelog"
-  next unless File.exist?(changelog)
   case File.readlines(changelog)[0]
   when /\((.+)-1\)/
     package_version = $1
