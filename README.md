@@ -6,7 +6,7 @@ This was formerly distributed with Groonga and provided as `groonga-httpd` with 
 
 ## Install
 
-Debian:
+Debian GNU/Linux bookworm or later:
 
 ```console
 $ sudo apt install -y -V ca-certificates lsb-release wget
@@ -23,7 +23,7 @@ $ sudo editor /etc/nginx/conf.d/groonga.conf
 $ sudo systemctl restart nginx
 ```
 
-Ubuntu:
+Ubuntu 23.04 or later:
 
 ```console
 $ sudo apt -y -V install software-properties-common

@@ -3,11 +3,11 @@ Section: httpd
 Priority: optional
 Maintainer: Groonga Project <packages@groonga.org>
 Build-Depends:
-  debhelper (>= 12.10),
+  debhelper (>= 13.11),
   libgroonga-dev,
   nginx-dev,
   pkg-config
-Standards-Version: 4.5.0
+Standards-Version: 4.6.2
 Homepage: https://github.com/groonga/groonga-nginx
 
 Package: libnginx-mod-http-groonga

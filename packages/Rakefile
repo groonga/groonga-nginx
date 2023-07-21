@@ -115,6 +115,12 @@ class GroongaNginxPackageTask < PackagesGroongaOrgPackageTask
     end
   end
 
+  def ubuntu_targets_default
+    [
+      ["lunar", "23.04"],
+    ]
+  end
+
   def enable_yum?
     false
   end
