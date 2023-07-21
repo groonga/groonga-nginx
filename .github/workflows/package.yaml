@@ -75,8 +75,15 @@ jobs:
             task-namespace: apt
             target: debian-bookworm
     runs-on: ubuntu-latest
+    env:
+      GROONGA_REPOSITORY: ${{ github.workspace }}/groonga
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: groonga/groonga
+          path: groonga
+          submodules: recursive
       - name: Install dependencies
         run: |
           sudo apt update
