@@ -1,0 +1,124 @@
+# -*- ruby -*-
+#
+# Copyright(C) 2023  Sutou Kouhei <kou@clear-code.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License version 2.1 as published by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+require "json"
+require "pathname"
+
+require_relative "../version"
+
+groonga_repository = ENV["GROONGA_REPOSITORY"]
+if groonga_repository.nil?
+  raise "Specify GROONGA_REPOSITORY environment variable"
+end
+require "#{groonga_repository}/packages/packages-groonga-org-package-task"
+
+class GroongaNginxPackageTask < PackagesGroongaOrgPackageTask
+  def initialize
+    super("groonga-nginx",
+          ENV["VERSION"] || GroongaNginx::VERSION,
+          detect_release_time)
+  end
+
+  private
+  def detect_release_time
+    release_time_env = ENV["RELEASE_TIME"] || ENV["NEW_RELEASE_DATE"]
+    if release_time_env
+      Time.parse(release_time_env).utc
+    else
+      Time.now.utc
+    end
+  end
+
+  def top_directory
+    packages_directory.parent
+  end
+
+  def packages_directory
+    Pathname(__dir__)
+  end
+
+  def original_archive_path
+    top_directory + @archive_name
+  end
+
+  def define_archive_task
+    unless original_archive_path.exist?
+      downloaded_original_archive_path =
+        top_directory +
+        "packages" +
+        "source" +
+        "tmp" +
+        "downloads" +
+        @version +
+        original_archive_path.basename
+      file original_archive_path.to_s => downloaded_original_archive_path.to_s do
+        ln_s(downloaded_original_archive_path,
+             original_archive_path)
+      end
+    end
+
+    [@archive_name, deb_archive_name, rpm_archive_name].each do |archive_name|
+      file archive_name => original_archive_path.to_s do
+        sh("tar", "xf", original_archive_path.to_s)
+        archive_base_name = File.basename(archive_name, ".tar.gz")
+        if @archive_base_name != archive_base_name
+          mv(@archive_base_name, archive_base_name)
+        end
+        sh("tar", "czf", archive_name, archive_base_name)
+        rm_r(archive_base_name)
+      end
+    end
+  end
+
+  def github_repository
+    "groonga/groonga-nginx"
+  end
+
+  def latest_groonga_version
+    @latest_groonga_version ||= detect_latest_groonga_version
+  end
+
+  def detect_latest_groonga_version
+    releases_uri = URI("https://api.github.com/repos/groonga/groonga/releases")
+    releases_uri.open do |releases_output|
+      releases = JSON.parse(releases_output.read)
+      releases[0]["tag_name"].delete_prefix("v")
+    end
+  end
+
+  def apt_prepare_debian_control(control_in, target)
+    substitute_content(control_in) do |key, matched|
+      apt_expand_variable(key) || matched
+    end
+  end
+
+  def apt_expand_variable(key)
+    case key
+    when "GROONGA_VERSION"
+      latest_groonga_version
+    else
+      nil
+    end
+  end
+
+  def enable_yum?
+    false
+  end
+end
+
+task = GroongaNginxPackageTask.new
+task.define

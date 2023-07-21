@@ -1,4 +1,4 @@
-# ngx\_http\_groonga\_module
+# groonga-nginx
 
 This is a nginx module to use Groonga via HTTP.
 

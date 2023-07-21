@@ -1,0 +1,170 @@
+# Copyright (C) 2023  Sutou Kouhei <kou@clear-code.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License version 2.1 as published by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+name: Package
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: |
+        0 0 * * *
+concurrency:
+  group: ${{ github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+jobs:
+  source:
+    name: Source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build archive
+        run: |
+          rake dist
+
+      # Artifact
+      - uses: actions/upload-artifact@v3
+        with:
+          name: source
+          path: |
+            groonga-nginx-*.tar.gz
+
+      # Release
+      - name: Upload to release
+        if: |
+          startsWith(github.ref, 'refs/tags/')
+        run: |
+          ruby \
+            -e 'print("## groonga-nginx "); \
+                puts(ARGF.read.split(/^## /)[1]. \
+                       gsub(/ {.+?}/, ""). \
+                       gsub(/\[(.+?)\]\[.+?\]/) {$1})' \
+            NEWS.md > release-note.md
+          title="$(head -n1 release-note.md | sed -e 's/^## //')"
+          tail -n +2 release-note.md > release-note-without-version.md
+          gh release create ${GITHUB_REF_NAME} \
+            --discussion-category Releases \
+            --notes-file release-note-without-version.md \
+            --title "${title}" \
+            groonga-nginx-*.tar.gz
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  build:
+    name: Build
+    needs: source
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: debian-bookworm-amd64
+            task-namespace: apt
+            target: debian-bookworm
+          - id: debian-bookworm-arm64
+            task-namespace: apt
+            target: debian-bookworm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y -V \
+            devscripts \
+            qemu-user-static \
+            ruby
+      - uses: actions/download-artifact@v3
+        with:
+          name: source
+      - name: Update version
+        if: |
+          !startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd packages
+          rake version:update RELEASE_DATE=$(date +%Y-%m-%d)
+      - name: Login to GitHub Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache ccache
+        uses: actions/cache@v3
+        with:
+          path: packages/${{ matrix.task-namespace }}/build/${{ matrix.target }}/ccache
+          key: package-${{ matrix.id }}-ccache-${{ hashFiles('*.c') }}
+          restore-keys: package-${{ matrix.id }}-ccache-
+      - name: Build with docker
+        run: |
+          cd packages
+          rake docker:pull || :
+          rake ${{ matrix.task-namespace }}:build BUILD_DIR=build
+        env:
+          APT_TARGETS: ${{ matrix.target }}
+          YUM_TARGETS: ${{ matrix.target }}
+      - name: Push the built Docker image
+        continue-on-error: true
+        run: |
+          cd packages
+          rake docker:push
+        env:
+          APT_TARGETS: ${{ matrix.target }}
+          YUM_TARGETS: ${{ matrix.target }}
+
+      # Artifact
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packages-${{ matrix.id }}
+          path: packages/${{ matrix.task-namespace }}/repositories/
+
+      # Release
+      - name: Create assets
+        if: |
+          startsWith(github.ref, 'refs/tags/')
+        run: |
+          tar czf ${{ matrix.id }}.tar.gz packages/${{ matrix.task-namespace }}/repositories/
+      - name: Upload to release
+        run: |
+          gh release upload ${GITHUB_REF_NAME} \
+            ${{ matrix.id }}.tar.gz
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  test:
+    name: Test
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: debian-bookworm-amd64
+            task-namespace: apt
+          - id: debian-bookworm-arm64
+            task-namespace: apt
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: packages-${{ matrix.id }}
+      - name: Run VM
+        run: |
+          vagrant up ${{ matrix.id }}
+      - name: Run test
+        run: |
+          vagrant \
+            ssh ${{ matrix.id }} \
+            -- \
+            /vagrant/packages/${{ matrix.task-namespace }}/test.sh
+        timeout-minutes: 20

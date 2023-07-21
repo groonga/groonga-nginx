@@ -1,0 +1,20 @@
+Source: groonga-nginx
+Section: httpd
+Priority: optional
+Maintainer: Groonga Project <packages@groonga.org>
+Build-Depends:
+  debhelper (>= 12.10),
+  libgroonga-dev,
+  nginx-dev,
+  pkg-config
+Standards-Version: 4.5.0
+Homepage: https://github.com/groonga/groonga-nginx
+
+Package: libnginx-mod-http-groonga
+Architecture: any
+Depends:
+  ${misc:Depends},
+  ${shlibs:Depends},
+  libgroonga0 (>= @GROONGA_VERSION@)
+Description: Groonga module for nginx
+ You can use Groonga full-text search engine on nginx with this module.
