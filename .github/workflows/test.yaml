@@ -67,6 +67,7 @@ jobs:
             sudo apt -y install \
               cmake \
               libmecab-dev \
+              libmsgpack-dev \
               mecab-naist-jdic \
               ninja-build
             cmake \
