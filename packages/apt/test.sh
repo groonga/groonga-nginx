@@ -79,7 +79,7 @@ popd
 sudo apt update
 sudo apt install -V -y libnginx-mod-http-groonga
 
-sudo cp /vagrant/groonga.conf /etc/nginx/sites-enabled/
+sudo ln -s ../groonga.conf /etc/nginx/conf.d/
 sudo systemctl restart nginx
 
 curl http://localhost:10041/d/status

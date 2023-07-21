@@ -24,3 +24,8 @@ export NGX_HTTP_GROONGA_QUERY_LOG_PATH=/var/log/nginx/groonga-query.log
 
 %:
 	dh $@ --with nginx
+
+override_dh_auto_install:
+	dh_auto_install --buildsystem=nginx_mod
+	install -d debian/tmp/etc/nginx
+	install -m 0644 groonga.conf debian/tmp/etc/nginx
