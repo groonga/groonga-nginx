@@ -68,6 +68,7 @@ jobs:
               cmake \
               libmecab-dev \
               libmsgpack-dev \
+              libxxhash-dev \
               mecab-naist-jdic \
               ninja-build
             cmake \
