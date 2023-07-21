@@ -167,6 +167,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: packages-${{ matrix.id }}
+          path: packages/${{ matrix.task-namespace }}/repositories
       - name: Run VM
         run: |
           vagrant up ${{ matrix.id }}
