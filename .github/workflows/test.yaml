@@ -128,5 +128,5 @@ jobs:
             --ngx-http-groonga-module-so=/tmp/local/modules/ngx_http_groonga_module.so \
             --read-timeout=30 \
             --reporter=mark \
-            --testee=groonga-httpd \
+            --testee=groonga-nginx \
             test/command/suite
