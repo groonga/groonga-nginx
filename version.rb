@@ -14,5 +14,5 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 module GroongaNginx
-  VERSION = "1.0.0"
+  VERSION = "1.0.1"
 end
