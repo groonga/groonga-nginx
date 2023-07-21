@@ -88,6 +88,13 @@ class GroongaNginxPackageTask < PackagesGroongaOrgPackageTask
     "groonga/groonga-nginx"
   end
 
+  def apt_targets_default
+    [
+      "debian-bookworm",
+      "debian-bookworm-arm64",
+    ]
+  end
+
   def latest_groonga_version
     @latest_groonga_version ||= detect_latest_groonga_version
   end
