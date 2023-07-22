@@ -23,7 +23,7 @@ $ sudo editor /etc/nginx/conf.d/groonga.conf
 $ sudo systemctl restart nginx
 ```
 
-Ubuntu 23.04 or later:
+Ubuntu 23.10 or later:
 
 ```console
 $ sudo apt -y -V install software-properties-common

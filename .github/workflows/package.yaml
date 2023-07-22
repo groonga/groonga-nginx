@@ -72,8 +72,6 @@ jobs:
             task-namespace: apt
           - id: debian-bookworm-arm64
             task-namespace: apt
-          - id: ubuntu-lunar-amd64
-            task-namespace: apt
     runs-on: ubuntu-latest
     env:
       GROONGA_REPOSITORY: ${{ github.workspace }}/groonga
