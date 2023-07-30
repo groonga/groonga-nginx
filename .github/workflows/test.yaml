@@ -26,6 +26,10 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ubuntu:
+    if: >-
+      github.event_name != 'schedule' ||
+      (github.event_name == 'schedule' &&
+       github.repository_owner == 'groonga')
     name: Ubuntu + Groonga (${{ matrix.groonga-version }})
     runs-on: ubuntu-latest
     strategy:
