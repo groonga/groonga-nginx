@@ -172,4 +172,4 @@ jobs:
             ssh ${{ matrix.id }} \
             -- \
             /vagrant/packages/${{ matrix.task-namespace }}/test.sh
-        timeout-minutes: 20
+        timeout-minutes: 30
