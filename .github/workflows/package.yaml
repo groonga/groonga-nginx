@@ -31,6 +31,7 @@ jobs:
        github.repository_owner == 'groonga')
     name: Source
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
       - name: Build archive
@@ -77,6 +78,7 @@ jobs:
           - id: debian-bookworm-arm64
             task-namespace: apt
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       GROONGA_REPOSITORY: ${{ github.workspace }}/groonga
     steps:
@@ -161,6 +163,7 @@ jobs:
           - id: debian-bookworm-amd64
             task-namespace: apt
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
