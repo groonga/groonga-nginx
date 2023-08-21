@@ -70,10 +70,6 @@ jobs:
           else
             sudo apt -y install \
               cmake \
-              libmecab-dev \
-              libmsgpack-dev \
-              libxxhash-dev \
-              mecab-naist-jdic \
               ninja-build
             cmake \
               -S groonga \
