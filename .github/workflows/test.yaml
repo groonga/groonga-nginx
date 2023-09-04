@@ -40,7 +40,7 @@ jobs:
           - "latest"
           - "master"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           sudo apt -y -V install software-properties-common
@@ -55,7 +55,7 @@ jobs:
           path: ~/.ccache
           key: ubuntu-${{ matrix.groonga-version }}-ccache-${{ hashFiles('*.c') }}
           restore-keys: ubuntu-${{ matrix.groonga-version }}-ccache-
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if:
           matrix.groonga-version == 'master'
         with:
