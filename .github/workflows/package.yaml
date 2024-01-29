@@ -75,8 +75,10 @@ jobs:
         include:
           - id: debian-bookworm-amd64
             task-namespace: apt
+            test-image: images:debian/12
           - id: debian-bookworm-arm64
             task-namespace: apt
+            test-image: images:debian/12/arm64
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -153,30 +155,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-  test:
-    name: Test
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - id: debian-bookworm-amd64
-            task-namespace: apt
-    runs-on: macos-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: packages-${{ matrix.id }}
-          path: packages/${{ matrix.task-namespace }}/repositories
-      - name: Run VM
+      # Test
+      - name: Install test dependencies
         run: |
-          vagrant up ${{ matrix.id }}
-      - name: Run test
+          # We can use the official Ubuntu APT repository when
+          # ubuntu-latest is Ubuntu 24.04.
+          sudo curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc
+          cat <<SOURCES | sudo tee/etc/apt/sources.list.d/zabbly-incus-stable.sources
+          Enabled: yes
+          Types: deb
+          URIs: https://pkgs.zabbly.com/incus/stable
+          Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
+          Components: main
+          Architectures: $(dpkg --print-architecture)
+          Signed-By: /etc/apt/keyrings/zabbly.asc
+          SOURCES
+
+          sudo apt update
+          sudo apt install -y -V incus
+      - name: Test
         run: |
-          vagrant \
-            ssh ${{ matrix.id }} \
-            -- \
-            /vagrant/packages/${{ matrix.task-namespace }}/test.sh
-        timeout-minutes: 30
+          incus launch test-image target
+          incus config device add target host disk source=$PWD path=/host
+          incus exec target -- adduser --uid 1000 groonga-nginx
+          incus exec target -- \
+            sh -c "echo 'groonga-nginx ALL=(ALL:ALL) NOPASSWD:ALL' | \
+                     EDITOR='tee -a' visudo -f /etc/sudoers.d/groonga-nginx-nopasswd"
+          incus exec target --user 1000 --group 1000 -- \
+            /host/packages/${{ matrix.task-namespace }}/test.sh
+          incus stop target
+          incus delete target
