@@ -50,7 +50,7 @@ jobs:
           apt source nginx
           ln -fs nginx-* nginx
       - name: Cache ccache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.ccache
           key: ubuntu-${{ matrix.groonga-version }}-ccache-${{ hashFiles('*.c') }}
