@@ -75,10 +75,10 @@ jobs:
         include:
           - id: debian-bookworm-amd64
             task-namespace: apt
-            test-image: images:debian/12
+            test-image: "images:debian/12"
           - id: debian-bookworm-arm64
             task-namespace: apt
-            test-image: images:debian/12/arm64
+            test-image: "images:debian/12/arm64"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -161,7 +161,7 @@ jobs:
           # We can use the official Ubuntu APT repository when
           # ubuntu-latest is Ubuntu 24.04.
           sudo curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc
-          cat <<SOURCES | sudo tee/etc/apt/sources.list.d/zabbly-incus-stable.sources
+          cat <<SOURCES | sudo tee /etc/apt/sources.list.d/zabbly-incus-stable.sources
           Enabled: yes
           Types: deb
           URIs: https://pkgs.zabbly.com/incus/stable
