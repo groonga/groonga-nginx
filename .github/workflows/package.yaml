@@ -175,7 +175,7 @@ jobs:
           sudo apt install -y -V incus
       - name: Test
         run: |
-          sudo incus admin init
+          sudo incus admin init --auto
           sudo incus launch test-image target
           sudo incus config device add target host disk source=$PWD path=/host
           sudo incus exec target -- adduser --uid 1000 groonga-nginx
