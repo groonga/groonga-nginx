@@ -176,7 +176,7 @@ jobs:
       - name: Test
         run: |
           sudo incus admin init --auto
-          sudo incus launch test-image target
+          sudo incus launch ${{ matrix.test-image }} target
           sudo incus config device add target host disk source=$PWD path=/host
           sudo incus exec target -- adduser --uid 1000 groonga-nginx
           sudo incus exec target -- \
