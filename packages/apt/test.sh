@@ -99,7 +99,7 @@ echo "::endgroup::"
 
 
 echo "::group::Connection test"
-sudo apt install -V -y jq curl
+sudo apt install -V -y curl jq
 curl http://localhost:10041/d/status | tee status.json
 groonga_version=$(jq -r '.[1].version' status.json)
 echo "::endgroup::"
