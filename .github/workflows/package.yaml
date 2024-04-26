@@ -76,9 +76,10 @@ jobs:
           - id: debian-bookworm-amd64
             task-namespace: apt
             test-image: "images:debian/12"
-          - id: debian-bookworm-arm64
-            task-namespace: apt
-            test-image: "images:debian/12/arm64"
+          # We can't use Incus for different architecture.
+          # - id: debian-bookworm-arm64
+          #   task-namespace: apt
+          #   test-image: "images:debian/12/arm64"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
