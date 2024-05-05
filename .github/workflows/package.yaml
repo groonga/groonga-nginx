@@ -184,14 +184,14 @@ jobs:
           sudo incus admin init --auto
           sudo incus launch ${{ matrix.test-image }} target
           sudo incus config device add target host disk source=$PWD path=/host
-          sudo incus exec target -- adduser --uid 1000 groonga-nginx
+          sudo incus exec target -- adduser --uid 10000 groonga-nginx
           sudo incus exec target -- \
             sh -c "echo 'groonga-nginx ALL=(ALL:ALL) NOPASSWD:ALL' | \
                      EDITOR='tee -a' visudo -f /etc/sudoers.d/groonga-nginx-nopasswd"
           sudo incus exec target \
             --cwd /home/groonga-nginx \
-            --user 1000 \
-            --group 1000 \
+            --user 10000 \
+            --group 10000 \
             -- \
             /host/packages/${{ matrix.task-namespace }}/test.sh
           sudo incus stop target
