@@ -38,7 +38,7 @@ jobs:
       matrix:
         groonga-version:
           - "latest"
-          - "master"
+          - "main"
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
           restore-keys: ubuntu-${{ matrix.groonga-version }}-ccache-
       - uses: actions/checkout@v4
         if:
-          matrix.groonga-version == 'master'
+          matrix.groonga-version == 'main'
         with:
           repository: groonga/groonga
           path: groonga
@@ -95,7 +95,7 @@ jobs:
           make install
       - name: Enable Apache Arrow repository
         if:
-          matrix.groonga-version == 'master'
+          matrix.groonga-version == 'main'
         run: |
           sudo apt update -o="APT::Acquire::Retries=3"
           sudo apt install -y -V -o="APT::Acquire::Retries=3" \
@@ -106,7 +106,7 @@ jobs:
           sudo apt update -o="APT::Acquire::Retries=3"
       - name: Install test dependencies
         if:
-          matrix.groonga-version == 'master'
+          matrix.groonga-version == 'main'
         run: |
           sudo env MAKEFLAGS=-j$(nproc) gem install \
             grntest \
@@ -114,7 +114,7 @@ jobs:
             red-arrow
       - name: Set environment variables
         if:
-          matrix.groonga-version == 'master'
+          matrix.groonga-version == 'main'
         run: |
           echo "LD_LIBRARY_PATH=/tmp/local/lib" >> ${GITHUB_ENV}
           echo "TZ=Asia/Tokyo" >> ${GITHUB_ENV}
@@ -123,7 +123,7 @@ jobs:
           echo "/tmp/local/sbin" >> ${GITHUB_PATH}
       - name: Test
         if:
-          matrix.groonga-version == 'master'
+          matrix.groonga-version == 'main'
         run: |
           cd groonga
           grntest \
