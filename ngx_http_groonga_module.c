@@ -709,7 +709,7 @@ ngx_http_groonga_handler_process_command_path(ngx_http_request_t *r,
   GRN_OBJ_FIN(context, &uri);
 }
 
-static gbool
+static bool
 ngx_http_groonga_handler_validate_post_command(ngx_http_request_t *r,
                                                ngx_str_t *command_path,
                                                ngx_http_groonga_handler_data_t *data)
