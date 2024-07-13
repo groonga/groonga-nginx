@@ -77,11 +77,11 @@ typedef struct {
 } ngx_http_groonga_database_callback_data_t;
 
 typedef struct {
-  grn_bool initialized;
+  bool initialized;
   grn_rc rc;
   struct {
-    grn_bool processed;
-    grn_bool header_sent;
+    bool processed;
+    bool header_sent;
     ngx_http_request_t *r;
     ngx_int_t rc;
     ngx_chain_t *free_chain;
@@ -117,40 +117,40 @@ ngx_str_null_terminate(ngx_pool_t *pool, const ngx_str_t *string)
   return null_terminated_c_string;
 }
 
-static grn_bool
+static bool
 ngx_str_equal_c_string(ngx_str_t *string, const char *c_string)
 {
   if (string->len != strlen(c_string)) {
-    return GRN_FALSE;
+    return false;
   }
 
   return memcmp(c_string, string->data, string->len) == 0;
 }
 
-static grn_bool
+static bool
 ngx_str_start_with_c_string(ngx_str_t *string, const char *c_string)
 {
   const size_t c_string_len = strlen(c_string);
 
   if (string->len < c_string_len) {
-    return GRN_FALSE;
+    return false;
   }
 
   return memcmp(c_string, string->data, c_string_len) == 0;
 }
 
-static grn_bool
+static bool
 ngx_str_is_custom_path(ngx_str_t *string)
 {
   if (string->len == 0) {
-    return GRN_FALSE;
+    return false;
   }
 
   if (strncmp((const char *)(string->data), "off", string->len) == 0) {
-    return GRN_FALSE;
+    return false;
   }
 
-  return GRN_TRUE;
+  return true;
 }
 
 static uint32_t
@@ -439,10 +439,10 @@ ngx_http_groonga_context_receive_handler_raw(grn_ctx *context,
   int recv_flags;
   ngx_http_request_t *r;
   ngx_log_t *log;
-  grn_bool is_last_chunk;
+  bool is_last_chunk;
 
   grn_ctx_recv(context, &chunk, &chunk_size, &recv_flags);
-  data->raw.processed = GRN_TRUE;
+  data->raw.processed = true;
 
   if (data->raw.rc != NGX_OK) {
     return;
@@ -464,7 +464,7 @@ ngx_http_groonga_context_receive_handler_raw(grn_ctx *context,
       r->headers_out.content_length_n = -1;
     }
     data->raw.rc = ngx_http_send_header(r);
-    data->raw.header_sent = GRN_TRUE;
+    data->raw.header_sent = true;
 
     if (data->raw.rc != NGX_OK) {
       return;
@@ -665,11 +665,11 @@ ngx_http_groonga_handler_create_data(ngx_http_request_t *r,
   data = cleanup->data;
   *data_return = data;
 
-  data->initialized = GRN_TRUE;
+  data->initialized = true;
   data->rc = GRN_SUCCESS;
 
-  data->raw.processed = GRN_FALSE;
-  data->raw.header_sent = GRN_FALSE;
+  data->raw.processed = false;
+  data->raw.header_sent = false;
   data->raw.r = r;
   data->raw.rc = NGX_OK;
   data->raw.free_chain = NULL;
@@ -709,7 +709,7 @@ ngx_http_groonga_handler_process_command_path(ngx_http_request_t *r,
   GRN_OBJ_FIN(context, &uri);
 }
 
-static grn_bool
+static bool
 ngx_http_groonga_handler_validate_post_command(ngx_http_request_t *r,
                                                ngx_str_t *command_path,
                                                ngx_http_groonga_handler_data_t *data)
@@ -723,10 +723,10 @@ ngx_http_groonga_handler_validate_post_command(ngx_http_request_t *r,
     command.len = command_path->len - r->args.len - strlen("?");
   }
   if (ngx_str_equal_c_string(&command, "load")) {
-    return GRN_TRUE;
+    return true;
   }
   if (ngx_str_start_with_c_string(&command, "load.")) {
-    return GRN_TRUE;
+    return true;
   }
 
   data->rc = GRN_INVALID_ARGUMENT;
@@ -736,7 +736,7 @@ ngx_http_groonga_handler_validate_post_command(ngx_http_request_t *r,
   GRN_TEXT_PUT(context, &(data->typed.body), command.data, command.len);
   GRN_TEXT_PUTS(context, &(data->typed.body), ">");
 
-  return GRN_FALSE;
+  return false;
 }
 
 static void
@@ -1252,7 +1252,7 @@ ngx_http_groonga_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
   ngx_conf_merge_str_value(conf->database_path, prev->database_path, NULL);
   ngx_conf_merge_value(conf->database_auto_create,
                        prev->database_auto_create,
-                       GRN_TRUE);
+                       true);
   ngx_conf_merge_size_value(conf->cache_limit, prev->cache_limit,
                             GRN_CACHE_DEFAULT_MAX_N_ENTRIES);
 
