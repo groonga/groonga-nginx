@@ -310,6 +310,6 @@ location /d/ {
 
 ## License
 
-LGPLv2.1 only.
+LGPLv2.1 or later.
 
 See [COPYING](COPYING) for details.
