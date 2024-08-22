@@ -308,6 +308,26 @@ location /d/ {
 }
 ```
 
+## For developers
+
+### Upload to the `ppa` repository
+
+1. Follow the [PGroonga documentation](https://pgroonga.github.io/development/release.html#requirements) and do the required setup
+   * The environment variables used in this repository are `GROONGA_REPOSITORY`, `LAUNCHPAD_UPLOADER_PGP_KEY` and `APACHE_ARROW_REPOSITORY`
+2. Install `nginx-dev`
+   * Install `nginx-dev` as it is also required
+   * Note: The working machine must be 24.04 or higher for Ubuntu
+3. Download source code
+   ```bash
+   cd packages
+   rake source:download
+   cp ./source/tmp/downloads/*/groonga-nginx-*.tar.gz ..
+   ```
+4. Upload
+   ```bash
+   rake ubuntu UBUNTU_TARGETS=noble,24.04
+   ```
+
 ## License
 
 LGPLv2.1 or later.
