@@ -125,7 +125,7 @@ class GroongaNginxPackageTask < PackagesGroongaOrgPackageTask
 
   def ubuntu_targets_default
     [
-      # ["mantic", "23.10"],
+      ["noble", "24.04"],
     ]
   end
 
