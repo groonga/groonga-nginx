@@ -81,6 +81,9 @@ jobs:
           # - id: debian-bookworm-arm64
           #   task-namespace: apt
           #   test-image: "images:debian/12/arm64"
+          - id: ubuntu-noble-amd64
+            task-namespace: apt
+            test-image: "images:ubuntu/24.04"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
