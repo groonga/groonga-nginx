@@ -47,27 +47,6 @@ jobs:
             groonga-nginx-*.tar.gz
             groonga-nginx-*.zip
 
-      # # Release
-      # - name: Upload to release
-      #   if: |
-      #     startsWith(github.ref, 'refs/tags/')
-      #   run: |
-      #     ruby \
-      #       -e 'print("## groonga-nginx "); \
-      #           puts(ARGF.read.split(/^## /)[1]. \
-      #                  gsub(/ {.+?}/, ""). \
-      #                  gsub(/\[(.+?)\]\[.+?\]/) {$1})' \
-      #       NEWS.md > release-note.md
-      #     title="$(head -n1 release-note.md | sed -e 's/^## //')"
-      #     tail -n +2 release-note.md > release-note-without-version.md
-      #     gh release create ${GITHUB_REF_NAME} \
-      #       --discussion-category Announcements \
-      #       --notes-file release-note-without-version.md \
-      #       --title "${title}" \
-      #       groonga-nginx-*.tar.gz
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-
   build:
     name: Build
     needs: source
@@ -151,21 +130,6 @@ jobs:
         with:
           name: packages-${{ matrix.id }}
           path: packages/${{ matrix.task-namespace }}/repositories/
-
-      # # Release
-      # - name: Create assets
-      #   if: |
-      #     startsWith(github.ref, 'refs/tags/')
-      #   run: |
-      #     tar czf ${{ matrix.id }}.tar.gz packages/${{ matrix.task-namespace }}/repositories/
-      # - name: Upload to release
-      #   if: |
-      #     startsWith(github.ref, 'refs/tags/')
-      #   run: |
-      #     gh release upload ${GITHUB_REF_NAME} \
-      #       ${{ matrix.id }}.tar.gz
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
 
       # Test
       - name: Install test dependencies

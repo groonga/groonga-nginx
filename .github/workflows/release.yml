@@ -1,0 +1,74 @@
+# Copyright (C) 2025  Kodama Takuya <otegami@clear-code.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+name: Release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  github:
+    name: GitHub
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Download artifacts
+        run: |
+          run_id=""
+          while true; do
+            echo "Waiting for run to start workflow..."
+            run_id=$(gh run list \
+                        --branch ${GITHUB_REF_NAME} \
+                        --jq '.[].databaseId' \
+                        --json databaseId \
+                        --limit 1 \
+                        --repo ${GITHUB_REPOSITORY} \
+                        --workflow "package.yml")
+            if [ -n "${run_id}" ]; then
+              break
+            fi
+            sleep 300
+          done
+          gh run watch \
+            --exit-status \
+            --interval 300 \
+            --repo ${GITHUB_REPOSITORY} \
+            ${run_id}
+          gh run download ${run_id} \
+            --dir release-artifacts \
+            --pattern "release-*" \
+            --repo ${GITHUB_REPOSITORY}
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Extract release note
+        run: |
+          ruby \
+            -e 'print("## groonga-nginx "); \
+                puts(ARGF.read.split(/^## /)[1]. \
+                       gsub(/ {.+?}/, ""). \
+                       gsub(/\[(.+?)\]\[.+?\]/) {$1})' \
+            NEWS.md > release-note.md
+      - name: Upload to release
+        run: |
+          title="$(head -n1 release-note.md | sed -e 's/^## //')"
+          tail -n +2 release-note.md > release-note-without-version.md
+          gh release create ${GITHUB_REF_NAME} \
+            --discussion-category Announcements \
+            --notes-file release-note-without-version.md \
+            --title "${title}" \
+            release-artifacts/*/*
+        env:
+          GH_TOKEN: ${{ github.token }}
