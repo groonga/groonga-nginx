@@ -77,14 +77,15 @@ jobs:
           - id: debian-bookworm-amd64
             task-namespace: apt
             test-image: "images:debian/12"
-          # We can't use Incus for different architecture.
-          # - id: debian-bookworm-arm64
-          #   task-namespace: apt
-          #   test-image: "images:debian/12/arm64"
+          - id: debian-bookworm-arm64
+            task-namespace: apt
+            test-image: "images:debian/12/arm64"
           - id: ubuntu-noble-amd64
             task-namespace: apt
             test-image: "images:ubuntu/24.04"
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{ contains(matrix.id, 'arm64') && 'ubuntu-24.04-arm' ||
+                                          'ubuntu-latest' }}
     timeout-minutes: 20
     env:
       APACHE_ARROW_REPOSITORY: ${{ github.workspace }}/apache-arrow
