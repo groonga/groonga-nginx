@@ -45,7 +45,6 @@ jobs:
           name: release-source
           path: |
             groonga-nginx-*.tar.gz
-            groonga-nginx-*.zip
 
   build:
     name: Build
