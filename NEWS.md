@@ -2,16 +2,16 @@
 
 ## 1.0.1 - 2025-02-21
 
-### Package distribution update
+### Package Distribution Update
 
-In previous releases, Ubuntu packages were available only through
-https://launchpad.net/~groonga/+archive/ubuntu/ppa. Starting with this release,
-packages are also distributed via https://packages.groonga.org/.
+In previous releases, Ubuntu packages were available only through the PPA on
+Launchpad(ppa:groonga/ppa). Starting with this release, packages are also
+distributed via our Groonga APT repository at https://packages.groonga.org.
 
 While the groonga-nginx package itself remains unchanged, the underlying Groonga
-dependency is different. The packages from https://packages.groonga.org/ include
-Groonga built with Apache Arrow enabled. Which unlocks extra features such as
-offline parallel index building.
+dependency is different. Packages from our Groonga APT repository
+(https://packages.groonga.org/) include Groonga built with Apache Arrow enabled,
+which unlocks extra features such as offline parallel index building.
 
 ### Migration Notice for groonga-nginx (Ubuntu Users Only)
 
