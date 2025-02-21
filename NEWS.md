@@ -13,11 +13,11 @@ dependency is different. The packages from packages.groonga.org include Groonga
 built with Apache Arrow enabled. Which unlocks extra features such as offline
 parallel index building.
 
-### Migration Notice for groonga-nginx
+### Migration Notice for groonga-nginx (Ubuntu Users Only)
 
-If you're currently using groonga-nginx, we recommend migrating to the packages
-provided by groonga.packages.org. Although the Groonga APT repository will still
-be available, it will no longer receive new updates in near future.
+If you're currently using groonga-nginx on Ubuntu, we recommend migrating to the
+packages provided by groonga.packages.org. Although the Groonga APT repository
+will still be available, it will no longer receive new updates in near future.
 
 For migration, please follow these steps:
 
