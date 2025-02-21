@@ -42,30 +42,9 @@ jobs:
       # Artifact
       - uses: actions/upload-artifact@v4
         with:
-          name: source
+          name: release-source
           path: |
             groonga-nginx-*.tar.gz
-
-      # Release
-      - name: Upload to release
-        if: |
-          startsWith(github.ref, 'refs/tags/')
-        run: |
-          ruby \
-            -e 'print("## groonga-nginx "); \
-                puts(ARGF.read.split(/^## /)[1]. \
-                       gsub(/ {.+?}/, ""). \
-                       gsub(/\[(.+?)\]\[.+?\]/) {$1})' \
-            NEWS.md > release-note.md
-          title="$(head -n1 release-note.md | sed -e 's/^## //')"
-          tail -n +2 release-note.md > release-note-without-version.md
-          gh release create ${GITHUB_REF_NAME} \
-            --discussion-category Announcements \
-            --notes-file release-note-without-version.md \
-            --title "${title}" \
-            groonga-nginx-*.tar.gz
-        env:
-          GH_TOKEN: ${{ github.token }}
 
   build:
     name: Build
@@ -110,7 +89,7 @@ jobs:
             ruby
       - uses: actions/download-artifact@v4
         with:
-          name: source
+          name: release-source
       - name: Update version
         if: |
           !startsWith(github.ref, 'refs/tags/')
@@ -150,21 +129,6 @@ jobs:
         with:
           name: packages-${{ matrix.id }}
           path: packages/${{ matrix.task-namespace }}/repositories/
-
-      # Release
-      - name: Create assets
-        if: |
-          startsWith(github.ref, 'refs/tags/')
-        run: |
-          tar czf ${{ matrix.id }}.tar.gz packages/${{ matrix.task-namespace }}/repositories/
-      - name: Upload to release
-        if: |
-          startsWith(github.ref, 'refs/tags/')
-        run: |
-          gh release upload ${GITHUB_REF_NAME} \
-            ${{ matrix.id }}.tar.gz
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       # Test
       - name: Install test dependencies
@@ -206,3 +170,75 @@ jobs:
             /host/packages/${{ matrix.task-namespace }}/test.sh
           sudo incus stop target
           sudo incus delete target
+
+  prepare-release:
+    name: Prepare for release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: packages
+          pattern: packages-*
+      - name: Group by distribution and version
+        run: |
+          set -x
+          for packages_path in packages/packages-*; do
+            # packages/packages-ubuntu-noble-amd64 ->
+            # ubuntu-noble
+            os=$(echo ${packages_path} | \
+                   grep -E -o '(debian|ubuntu)-[^-]+')
+
+            mkdir -p release/${os}/
+            # packages/packages-ubuntu-noble-amd64/ubuntu/pool/noble/ ->
+            # release/ubuntu-noble/ubuntu/pool/noble/
+            rsync -a ${packages_path}/ release/${os}/
+          done
+          for release_os_path in release/*; do
+            # release/ubuntu-noble ->
+            # ubuntu-noble
+            os=$(basename ${release_os_path})
+
+            # release/ubuntu-noble/ubuntu/pool/noble/ ->
+            # ubuntu-noble/ubuntu/pool/noble/
+            tar czf ${os}.tar.gz -C $(dirname ${release_os_path}) ${os}
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-packages
+          path: "*.tar.gz"
+
+  release:
+    if: |
+      github.ref_type == 'tag'
+    name: Release
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          pattern: release-*
+          merge-multiple: true
+      - name: Extract release note
+        run: |
+          ruby \
+            -e 'print("## groonga-nginx "); \
+                puts(ARGF.read.split(/^## /)[1]. \
+                       gsub(/ {.+?}/, ""). \
+                       gsub(/\[(.+?)\]\[.+?\]/) {$1})' \
+            NEWS.md > release-note.md
+      - name: Upload to release
+        run: |
+          title="$(head -n1 release-note.md | sed -e 's/^## //')"
+          tail -n +2 release-note.md > release-note-without-version.md
+          gh release create ${GITHUB_REF_NAME} \
+            --discussion-category Announcements \
+            --notes-file release-note-without-version.md \
+            --title "${title}" \
+            release-artifacts/*/*
+        env:
+          GH_TOKEN: ${{ github.token }}
