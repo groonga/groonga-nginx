@@ -10,7 +10,7 @@ packages.groonga.org.
 
 While the groonga-nginx package itself remains unchanged, the underlying Groonga
 dependency is different. The packages from packages.groonga.org include Groonga
-built with Apache Arrow enabled. Which unlocks extra features such as static
+built with Apache Arrow enabled. Which unlocks extra features such as offline
 parallel index building.
 
 ### Migration Notice for groonga-nginx
