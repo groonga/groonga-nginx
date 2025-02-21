@@ -15,7 +15,7 @@ parallel index building.
 
 ### Migration Notice for groonga-nginx
 
-If you’re currently using groonga-nginx, we recommend migrating to the packages
+If you're currently using groonga-nginx, we recommend migrating to the packages
 provided by groonga.packages.org. Although the Groonga APT repository will still
 be available, it will no longer receive new updates in near future.
 
