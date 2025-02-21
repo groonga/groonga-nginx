@@ -7,28 +7,17 @@ This was formerly distributed with Groonga and provided as `groonga-httpd` with 
 ## Install
 
 Debian GNU/Linux bookworm or later:
+Ubuntu 24.04 or later:
 
 ```console
 $ sudo apt install -y -V ca-certificates lsb-release wget
 $ wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
 $ sudo apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
 $ rm -f apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-$ wget https://packages.groonga.org/debian/groonga-apt-source-latest-$(lsb_release --codename --short).deb
+$ wget https://packages.groonga.org/$(lsb_release --id --short | tr 'A-Z' 'a-z')/groonga-apt-source-latest-$(lsb_release --codename --short).deb
 $ sudo apt install -y -V ./groonga-apt-source-latest-$(lsb_release --codename --short).deb
 $ rm -f groonga-apt-source-latest-$(lsb_release --codename --short).deb
 $ sudo apt update
-$ sudo apt install -y -V libnginx-mod-http-groonga
-$ sudo cp /etc/nginx/groonga.conf /etc/nginx/conf.d/
-$ sudo editor /etc/nginx/conf.d/groonga.conf
-$ sudo systemctl restart nginx
-```
-
-Ubuntu 23.10 or later:
-
-```console
-$ sudo apt -y -V install software-properties-common
-$ sudo add-apt-repository -y universe
-$ sudo add-apt-repository -y ppa:groonga/ppa
 $ sudo apt install -y -V libnginx-mod-http-groonga
 $ sudo cp /etc/nginx/groonga.conf /etc/nginx/conf.d/
 $ sudo editor /etc/nginx/conf.d/groonga.conf
