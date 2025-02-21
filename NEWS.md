@@ -26,7 +26,7 @@ $ wget https://packages.groonga.org/$(lsb_release --id --short | tr 'A-Z' 'a-z')
 $ sudo apt install -y -V ./groonga-apt-source-latest-$(lsb_release --codename --short).deb
 $ rm -f groonga-apt-source-latest-$(lsb_release --codename --short).deb
 $ sudo apt update
-$ sudo apt update -y -V libnginx-mod-http-groonga
+$ sudo apt install -y -V libnginx-mod-http-groonga
 ```
 
 ## 1.0.0 - 2023-07-21
