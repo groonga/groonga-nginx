@@ -62,6 +62,9 @@ jobs:
           - id: ubuntu-noble-amd64
             task-namespace: apt
             test-image: "images:ubuntu/24.04"
+          - id: ubuntu-noble-arm64
+            task-namespace: apt
+            test-image: "images:ubuntu/24.04/arm64"
     runs-on: >-
       ${{ contains(matrix.id, 'arm64') && 'ubuntu-24.04-arm' ||
                                           'ubuntu-latest' }}
