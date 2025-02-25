@@ -242,6 +242,6 @@ jobs:
             --discussion-category Announcements \
             --notes-file release-note-without-version.md \
             --title "${title}" \
-            release-artifacts/*/*
+            release-artifacts/*
         env:
           GH_TOKEN: ${{ github.token }}
