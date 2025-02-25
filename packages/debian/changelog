@@ -1,3 +1,9 @@
+groonga-nginx (1.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Abe Tomoaki <abe@clear-code.com>  Tue, 25 Feb 2025 02:17:08 -0000
+
 groonga-nginx (1.0.0-1) unstable; urgency=low
 
   * New upstream release.
