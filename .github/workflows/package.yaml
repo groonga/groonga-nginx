@@ -225,7 +225,6 @@ jobs:
         with:
           path: release-artifacts
           pattern: release-*
-          merge-multiple: true
       - name: Extract release note
         run: |
           ruby \
