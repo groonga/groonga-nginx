@@ -117,6 +117,7 @@ jobs:
         if:
           matrix.groonga-version == 'main'
         run: |
+          sudo gem install rubygems-requirements-system
           sudo env MAKEFLAGS=-j$(nproc) gem install \
             grntest \
             pkg-config \
