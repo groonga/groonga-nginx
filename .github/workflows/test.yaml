@@ -102,21 +102,11 @@ jobs:
             --prefix=/tmp/local
           make -j$(nproc)
           make install
-      - name: Enable Apache Arrow repository
-        if:
-          matrix.groonga-version == 'main'
-        run: |
-          sudo apt update -o="APT::Acquire::Retries=3"
-          sudo apt install -y -V -o="APT::Acquire::Retries=3" \
-            lsb-release \
-            wget
-          wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-          sudo apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-          sudo apt update -o="APT::Acquire::Retries=3"
       - name: Install test dependencies
         if:
           matrix.groonga-version == 'main'
         run: |
+          sudo gem install rubygems-requirements-system
           sudo env MAKEFLAGS=-j$(nproc) gem install \
             grntest \
             pkg-config \
