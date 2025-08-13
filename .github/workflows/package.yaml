@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build archive
         run: |
           rake dist
@@ -73,12 +73,12 @@ jobs:
       APACHE_ARROW_REPOSITORY: ${{ github.workspace }}/apache-arrow
       GROONGA_REPOSITORY: ${{ github.workspace }}/groonga
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
           path: apache-arrow
           repository: apache/arrow
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: groonga/groonga
           path: groonga
@@ -220,7 +220,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
           path: release-artifacts
