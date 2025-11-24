@@ -41,7 +41,7 @@ jobs:
           - "latest"
           - "main"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
           sudo apt -y -V install ccache
@@ -64,7 +64,7 @@ jobs:
           path: ~/.ccache
           key: ubuntu-${{ matrix.groonga-version }}-ccache-${{ hashFiles('*.c') }}
           restore-keys: ubuntu-${{ matrix.groonga-version }}-ccache-
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         if:
           matrix.groonga-version == 'main'
         with:
