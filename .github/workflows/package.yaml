@@ -40,7 +40,7 @@ jobs:
           rake dist
 
       # Artifact
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: release-source
           path: |
@@ -128,7 +128,7 @@ jobs:
           rake docker:push
 
       # Artifact
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: packages-${{ matrix.id }}
           path: packages/${{ matrix.task-namespace }}/repositories/
@@ -207,7 +207,7 @@ jobs:
             # ubuntu-noble/ubuntu/pool/noble/
             tar czf ${os}.tar.gz -C $(dirname ${release_os_path}) ${os}
           done
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: release-linux-packages
           path: "*.tar.gz"
