@@ -90,7 +90,7 @@ jobs:
             devscripts \
             qemu-user-static \
             ruby
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: release-source
       - name: Update version
@@ -180,7 +180,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           path: packages
           pattern: packages-*
@@ -221,7 +221,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           path: release-artifacts
           pattern: release-*
