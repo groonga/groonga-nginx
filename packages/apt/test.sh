@@ -66,6 +66,11 @@ sudo gpg \
   --no-default-keyring \
   --keyring /usr/share/keyrings/groonga-nginx.gpg \
   --import keys
+sudo gpg \
+  --no-default-keyring \
+  --keyring /usr/share/keyrings/groonga-nginx.gpg \
+  --armor \
+  --export | sudo tee /usr/share/keyrings/groonga-nginx.asc > /dev/null
 
 sudo apt install -V -y reprepro
 repositories_dir=/host/packages/apt/repositories
@@ -80,7 +85,7 @@ DISTRIBUTIONS
 reprepro includedeb ${code_name} \
   ${repositories_dir}/${distribution}/pool/${code_name}/${repository}/*/*/*_${architecture}.deb
 cat <<APT_SOURCES | sudo tee /etc/apt/sources.list.d/groonga-nginx.list
-deb [signed-by=/usr/share/keyrings/groonga-nginx.gpg] file://${PWD} ${code_name} main
+deb [signed-by=/usr/share/keyrings/groonga-nginx.asc] file://${PWD} ${code_name} main
 APT_SOURCES
 popd
 
